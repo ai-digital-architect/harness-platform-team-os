@@ -19,13 +19,24 @@ import build_index
 import graph_check
 
 MANIFEST = """\
+version: "1.0"
+
 product_areas:
-  - name: infrastructure
+
+  infrastructure:
+    description: "Terraform modules"
     repos:
       - name: harness-terraform-data
+        tech: [terraform]
         depends_on: []
+
       - name: harness-terraform-eks-blue
+        tech: [terraform]
         depends_on: [harness-terraform-data]
+
+deprecated:
+  - name: harness-terraform-eks2
+    reason: "Replaced by eks-blue/green"
 """
 
 
@@ -217,6 +228,90 @@ class TestFrontmatterParser(unittest.TestCase):
         with self.assertRaises(graph_check.FrontmatterError) as ctx:
             graph_check.parse_frontmatter("---\nedges:\n  - {rel: x, to: [a}\n---\n")
         self.assertEqual(ctx.exception.line, 3)
+
+
+class TestManifestValidation(GraphCheckBase):
+    def write(self, text):
+        (self.root / "repo-manifest.yaml").write_text(text, encoding="utf-8")
+
+    def test_valid_manifest_parses_names_and_deps(self):
+        self.write(MANIFEST)
+        manifest = graph_check.load_manifest(self.root)
+        self.assertEqual(graph_check.manifest_repo_names(manifest),
+                         {"harness-terraform-data", "harness-terraform-eks-blue",
+                          "harness-terraform-eks2"})
+        blue = manifest["areas"]["infrastructure"][1]
+        self.assertEqual(blue["depends_on"], ["harness-terraform-data"])
+        code, _, err = self.run_check()
+        self.assertEqual(code, 0, err)
+
+    def test_duplicate_repo_name_same_area(self):
+        self.write("""\
+product_areas:
+  infra:
+    repos:
+      - name: repo-a
+      - name: repo-a
+""")
+        code, _, err = self.run_check()
+        self.assertEqual(code, 1)
+        self.assertIn("duplicate repo name 'repo-a'", err)
+
+    def test_repo_in_two_product_areas(self):
+        self.write("""\
+product_areas:
+  infra:
+    repos:
+      - name: repo-a
+  tools:
+    repos:
+      - name: repo-a
+""")
+        code, _, err = self.run_check()
+        self.assertEqual(code, 1)
+        self.assertIn("belongs to more than one product area", err)
+
+    def test_missing_depends_on_target(self):
+        self.write("""\
+product_areas:
+  infra:
+    repos:
+      - name: repo-a
+        depends_on: [no-such-repo]
+""")
+        code, _, err = self.run_check()
+        self.assertEqual(code, 1)
+        self.assertIn("depends_on target 'no-such-repo' of repo 'repo-a' not found", err)
+        self.assertRegex(err, r"repo-manifest\.yaml:\d+: error")
+
+    def test_active_depending_on_deprecated_is_warning(self):
+        self.write("""\
+product_areas:
+  infra:
+    repos:
+      - name: repo-a
+        depends_on: [old-repo]
+deprecated:
+  - name: old-repo
+    reason: "gone"
+""")
+        code, _, err = self.run_check()
+        self.assertEqual(code, 0)
+        self.assertIn("warning: active repo 'repo-a' depends on deprecated repo 'old-repo'", err)
+
+    def test_repo_both_active_and_deprecated(self):
+        self.write("""\
+product_areas:
+  infra:
+    repos:
+      - name: repo-a
+deprecated:
+  - name: repo-a
+    reason: "gone"
+""")
+        code, _, err = self.run_check()
+        self.assertEqual(code, 1)
+        self.assertIn("listed both as active and deprecated", err)
 
 
 class TestBuildIndex(GraphCheckBase):
