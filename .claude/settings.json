@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit",
+      "Bash(python3 scripts/*)", "Bash(yq *)", "Bash(git status*)",
+      "Bash(git diff*)", "Bash(git log*)", "Bash(git add *)",
+      "Bash(git commit *)", "Bash(git checkout -b task/*)",
+      "Bash(bash harness-layer/skills/platform-graph/scripts/pk.sh *)"
+    ],
+    "ask": [
+      "Bash(git push*)",
+      "Bash(bash harness-layer/sync/sync-harness.sh*)",
+      "Bash(git clone*)"
+    ],
+    "deny": ["Bash(rm -rf*)", "Bash(git push --force*)", "WebFetch"]
+  },
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "Write|Edit|MultiEdit",
+      "hooks": [{ "type": "command",
+                  "command": "bash .claude/hooks/graph-check-on-edit.sh" }]
+    }],
+    "Stop": [{
+      "matcher": "",
+      "hooks": [{ "type": "command",
+                  "command": "bash .claude/hooks/task-gate-on-stop.sh" }]
+    }]
+  }
+}

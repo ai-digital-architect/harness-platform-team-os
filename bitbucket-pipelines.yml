@@ -1,0 +1,16 @@
+# Placeholder pipeline — real validate + index steps land in T0.4.
+image: python:3.11-slim
+
+pipelines:
+  default:
+    - step:
+        name: validate (placeholder)
+        script:
+          - echo "TODO(T0.4): run scripts/graph_check.py and scripts/build_index.py"
+          - echo "TODO(T0.4): fail on drift in knowledge/INDEX.md or knowledge/graph.json"
+  pull-requests:
+    '**':
+      - step:
+          name: validate (placeholder)
+          script:
+            - echo "TODO(T0.4): PR validation pipeline"

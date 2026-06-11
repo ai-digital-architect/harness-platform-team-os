@@ -1,0 +1,6 @@
+# Normalize all text to LF in the repo; bash hooks must stay LF or they break
+# under #!/usr/bin/env bash on Linux CI runners.
+* text=auto eol=lf
+
+# Belt-and-braces: shell scripts are LF regardless.
+*.sh text eol=lf
