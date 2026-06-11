@@ -8,7 +8,7 @@ Status legend: ⬜ todo · 🟡 in-progress · ✅ done · ⛔ blocked.
 | ID   | Title                                   | Status | Depends | PR |
 |------|-----------------------------------------|--------|---------|----|
 | T0.1 | Scaffold harness + repo skeleton        | ✅     | —       |    |
-| T0.2 | graph_check.py + build_index.py         | ⬜     | T0.1    |    |
+| T0.2 | graph_check.py + build_index.py         | ✅     | T0.1    | task/T0.2-graph-check-build-index (PR pending) |
 | T0.3 | GRAPH-SCHEMA.md + node templates        | ⬜     | T0.2    |    |
 | T0.4 | CI: validate + index                    | ⬜     | T0.2    |    |
 

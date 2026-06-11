@@ -5,3 +5,10 @@
 .DS_Store
 Thumbs.db
 *.swp
+
+# Python bytecode.
+__pycache__/
+*.pyc
+
+# Agent worktree scratch space.
+.claude/worktrees/
