@@ -1,0 +1,519 @@
+# repo-manifest.yaml
+
+# Master registry of all Harness Platform Team repositories
+
+# Used for: discovery, dependency mapping, onboarding, CI/CD orchestration
+
+ 
+
+version: "1.0"
+
+bitbucket_project: "HARNESS"
+
+default_branch: main
+
+ 
+
+product_areas:
+
+ 
+
+  infrastructure:
+
+    description: "Terraform modules, EKS, networking, IAM"
+
+    repos:
+
+      - name: 111282-113518-terraform-base
+
+        role: root-module
+
+        tech: [terraform]
+
+        deploy_target: aws
+
+        depends_on: []
+
+        subtree_candidates: []
+
+ 
+
+      - name: harness-terraform-data
+
+        role: data-infrastructure
+
+        tech: [terraform]
+
+        deploy_target: [kms, s3, dynamodb]
+
+        depends_on: [111282-113518-terraform-base]
+
+ 
+
+      - name: harness-terraform-integration
+
+        role: integration-infra
+
+        tech: [terraform]
+
+        deploy_target: [sns]
+
+        depends_on: [harness-terraform-data]
+
+ 
+
+      - name: harness-terraform-eks-blue
+
+        role: compute
+
+        tech: [terraform]
+
+        deploy_target: eks
+
+        depends_on: [harness-terraform-integration]
+
+ 
+
+      - name: harness-terraform-eks-green
+
+        role: compute
+
+        tech: [terraform]
+
+        deploy_target: eks
+
+        depends_on: [harness-terraform-integration]
+
+ 
+
+      - name: harness-terraform-lambda
+
+        role: compute
+
+        tech: [terraform]
+
+        deploy_target: lambda
+
+        depends_on: [harness-terraform-integration]
+
+ 
+
+      - name: harness-terraform-route53
+
+        role: networking
+
+        tech: [terraform]
+
+        deploy_target: route53
+
+        depends_on: [harness-terraform-data, harness-terraform-eks-blue]
+
+ 
+
+      - name: harness-terraform-secrets
+
+        role: security
+
+        tech: [terraform]
+
+        depends_on: [harness-terraform-data]
+
+ 
+
+      - name: harness-ecs-delegate-terraform-ecs
+
+        role: compute
+
+        tech: [terraform]
+
+        deploy_target: ecs
+
+        depends_on: [111282-113518-terraform-base]
+
+ 
+
+      - name: 111282-113518-terraform-cosign
+
+        tech: [terraform]
+
+        depends_on: [harness-terraform-integration]
+
+
+
+      - name: harness-terraform-magpie-consumer-lambda
+
+        tech: [terraform]
+
+        deploy_target: lambda
+
+
+
+  self-service:
+
+    description: "User-facing APIs and platform services"
+
+    repos:
+
+      - name: harness-api
+
+        tech: [java, spring-boot]
+
+        deploy_target: eks
+
+        depends_on: [harness-terraform-eks-blue]
+
+        docs: product-development/engineering/plans/self-service/
+
+ 
+
+      - name: harness-platform-api
+
+        tech: [java]
+
+        deploy_target: eks
+
+        depends_on: [harness-terraform-eks-blue]
+
+ 
+
+      - name: harness-custom-secrets-mgr
+
+        tech: [java]
+
+        deploy_target: jar
+
+ 
+
+      - name: harness-custom-delegate
+
+        tech: [docker]
+
+        deploy_target: docker
+
+ 
+
+      - name: harness-db-app
+
+        tech: [java]
+
+        deploy_target: lambda
+
+        depends_on: [harness-terraform-lambda]
+
+ 
+
+      - name: harness-ecs-delegate-app
+
+        tech: [terraform]
+
+        deploy_target: ecs
+
+ 
+
+      - name: harness-account-resources
+
+        tech: [terraform]
+
+        deploy_target: harness-saas
+
+ 
+
+  container-builds:
+
+    description: "Buildi container build system"
+
+    repos:
+
+      - name: buildi
+
+        tech: [kotlin, spring-boot]
+
+        deploy_target: ecs
+
+        depends_on: [buildi-terraform-ecs]
+
+ 
+
+      - name: buildi-cli
+
+        tech: [go]
+
+        deploy_target: cli
+
+ 
+
+      - name: buildi-kaniko
+
+        tech: [docker]
+
+        deploy_target: ecs-task
+
+ 
+
+      - name: buildi-kaniko-arm64
+
+        tech: [docker]
+
+        deploy_target: ecs-task
+
+ 
+
+      - name: buildi-kaniko-images
+
+        tech: [docker]
+
+        deploy_target: ecr
+
+ 
+
+      - name: buildi-terraform-data
+
+        tech: [terraform]
+
+        depends_on: [111282-113518-terraform-base]
+
+ 
+
+      - name: buildi-terraform-ecs
+
+        tech: [terraform]
+
+        depends_on: [111282-113518-terraform-base]
+
+ 
+
+      - name: buildi-terraform-roles
+
+        tech: [terraform]
+
+        depends_on: [111282-113518-terraform-base]
+
+ 
+
+      - name: buildi-terraform-connect
+
+        tech: [terraform]
+
+        depends_on: [buildi-terraform-roles]
+
+ 
+
+  integrations:
+
+    description: "Lambda-based event processing and integrations"
+
+    repos:
+
+      - name: lambda-harness-event-handler
+
+        tech: [python]
+
+        deploy_target: lambda
+
+        depends_on: [harness-terraform-lambda]
+
+ 
+
+      - name: lambda-cve-data-sync
+
+        tech: [python]
+
+        deploy_target: lambda
+
+ 
+
+      - name: lambda-harness-grc
+
+        tech: [java]
+
+        deploy_target: lambda
+
+ 
+
+      - name: lambda-jet-evidence-integration
+
+        tech: [python]
+
+        deploy_target: lambda
+
+ 
+
+      - name: lambda-privileged-access-mgmt
+
+        tech: [python]
+
+        deploy_target: lambda
+
+ 
+
+      - name: harness-magpie-consumer-lambda
+
+        tech: [python]
+
+        deploy_target: lambda
+
+        depends_on: [harness-terraform-magpie-consumer-lambda]
+
+ 
+
+  developer-tools:
+
+    description: "CLIs, AI tooling, pipeline utilities"
+
+    repos:
+
+      - name: harness-cli
+
+        tech: [python]
+
+        deploy_target: cli
+
+ 
+
+      - name: harness-actions
+
+        tech: [go, python]
+
+        deploy_target: cli
+
+ 
+
+      - name: harness-templates
+
+        tech: [python]
+
+        deploy_target: docker
+
+ 
+
+      - name: harness-pipeline-ops
+
+        tech: [python]
+
+        depends_on: [harness-rewrite-recipes]
+
+ 
+
+      - name: harness-rewrite-recipes
+
+        tech: [java]
+
+ 
+
+      - name: harness-utilities
+
+        tech: [python]
+
+ 
+
+      - name: company-mcp-server
+
+        tech: [python]
+
+        deploy_target: server
+
+ 
+
+      - name: harness-managed-pipeline-schema
+
+        tech: [pydantic]
+
+ 
+
+      - name: harness-ai-toolkit
+
+        tech: [manifest]
+
+ 
+
+      - name: harness-marketplace
+
+        tech: [config]
+
+ 
+
+  policy-and-governance:
+
+    description: "OPA policies, ADRs, monitoring"
+
+    repos:
+
+      - name: harness-policy
+
+        tech: [rego]
+
+ 
+
+      - name: harness-adr
+
+        tech: [markdown]
+
+ 
+
+      - name: harness-dynatrace-cloudwatch
+
+        tech: [terraform]
+
+ 
+
+      - name: harness-eks-extension-dynatrace
+
+        tech: [terraform]
+
+ 
+
+# Repos flagged for deprecation/deletion
+
+deprecated:
+
+  - name: harness-terraform-eks2
+
+    reason: "Replaced by eks-blue/green"
+
+  - name: harness-terraform-eks3
+
+    reason: "Replaced by eks-blue/green"
+
+  - name: 111282-113518-terraform-gremlin
+
+    reason: "Deletable"
+
+  - name: 111282-113518-terraform-purge
+
+    reason: "Deletable"
+
+  - name: swiss-terraform-eks
+
+    reason: "Deletable"
+
+ 
+
+# Git subtree plan — for future shared-code extraction
+
+subtree_plan:
+
+  shared_terraform_modules:
+
+    description: "Extract common TF patterns into subtrees consumable by downstream repos"
+
+    source: 111282-113518-terraform-base
+
+    consumers: [harness-terraform-data, harness-terraform-integration, buildi-terraform-data]
+
+    prefix: modules/shared-base
+
+    strategy: squash
+
+ 
+
+  shared_python_libs:
+
+    description: "Common Python utilities across lambdas"
+
+    source: harness-utilities
+
+    consumers: [lambda-harness-event-handler, lambda-cve-data-sync, lambda-privileged-access-mgmt]
+
+    prefix: libs/harness-common
+
+    strategy: squash

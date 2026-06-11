@@ -16,6 +16,9 @@ Validations:
   - workflow `repos:` entries exist in repo-manifest.yaml
     (skipped with a warning if the manifest is absent)
   - `_template.md` files are excluded from all checks
+  - repo-manifest.yaml itself (when present): unique repo names, every repo
+    in exactly one product area, depends_on targets exist, active repos
+    depending on deprecated repos (warning only)
 """
 
 import json
@@ -142,21 +145,116 @@ def parse_frontmatter(text):
     return data, key_lines, end + 2
 
 
-def load_manifest_repos(root):
-    """Return the set of repo names from repo-manifest.yaml, or None if absent.
+def parse_manifest(path):
+    """Parse repo-manifest.yaml (stdlib, targeted at its known shape).
 
-    Minimal extraction: any `name: <value>` line. Adequate until the manifest
-    schema grows fields named `name` outside repo entries.
+    Returns {"areas": {area: [repo, ...]}, "deprecated": [entry, ...],
+    "errors": [(line, message), ...]} where repo/entry dicts carry
+    name, depends_on (repos only), area and the 1-based source line.
+    Shape: product_areas is a map of area -> {description, repos: [- name: …]},
+    deprecated and subtree_plan are top-level; list fields are flow style.
     """
-    manifest = root / "repo-manifest.yaml"
-    if not manifest.is_file():
+    lines = path.read_text(encoding="utf-8").split("\n")
+    areas, deprecated, errors = {}, [], []
+    section = None
+    area, area_indent = None, None
+    repo = None
+
+    for i, raw in enumerate(lines, 1):
+        s = raw.strip()
+        if not s or s.startswith("#"):
+            continue
+        indent = len(raw) - len(raw.lstrip(" "))
+        if indent == 0:
+            section, area, area_indent, repo = None, None, None, None
+            key = s.split(":", 1)[0].strip()
+            if key in ("product_areas", "deprecated", "subtree_plan"):
+                section = key
+            continue
+
+        if section == "product_areas":
+            if s.startswith("- "):
+                if not s.startswith("- name:"):
+                    if repo is None:
+                        errors.append((i, f"repo entry must start with 'name:': {s!r}"))
+                    continue
+                name = _strip_quotes(s.split(":", 1)[1])
+                repo = {"name": name, "depends_on": [], "area": area, "line": i}
+                areas.setdefault(area, []).append(repo)
+            elif s.endswith(":") and (area_indent is None or indent <= area_indent):
+                area, area_indent, repo = s[:-1].strip(), indent, None
+                areas.setdefault(area, [])
+            elif ":" in s and repo is not None:
+                key, val = s.split(":", 1)
+                if key.strip() == "depends_on" and val.strip():
+                    try:
+                        parsed = _parse_value(val, i)
+                    except FrontmatterError as e:
+                        errors.append((e.line, e.message))
+                        continue
+                    repo["depends_on"] = parsed if isinstance(parsed, list) else [parsed]
+            # description:/repos: keys and repo scalar fields need no handling
+        elif section == "deprecated":
+            if s.startswith("- name:"):
+                deprecated.append({"name": _strip_quotes(s.split(":", 1)[1]), "line": i})
+    return {"areas": areas, "deprecated": deprecated, "errors": errors}
+
+
+def validate_manifest(manifest, path):
+    """T1.1 manifest checks. Returns (errors, warnings) as (path, line, msg)."""
+    errors = [(path, line, msg) for line, msg in manifest["errors"]]
+    warnings = []
+    seen = {}  # name -> (area, line)
+    for area, repos in manifest["areas"].items():
+        for r in repos:
+            if r["name"] in seen:
+                prev_area, prev_line = seen[r["name"]]
+                if prev_area == area:
+                    errors.append((path, r["line"],
+                                   f"duplicate repo name {r['name']!r} in product area "
+                                   f"{area!r} (first at line {prev_line})"))
+                else:
+                    errors.append((path, r["line"],
+                                   f"repo {r['name']!r} belongs to more than one product "
+                                   f"area: {prev_area!r} (line {prev_line}) and {area!r}"))
+            else:
+                seen[r["name"]] = (area, r["line"])
+    dep_names = {}
+    for d in manifest["deprecated"]:
+        if d["name"] in seen:
+            errors.append((path, d["line"],
+                           f"repo {d['name']!r} is listed both as active and deprecated"))
+        dep_names[d["name"]] = d["line"]
+    for area, repos in manifest["areas"].items():
+        for r in repos:
+            for target in r["depends_on"]:
+                if target in seen:
+                    continue
+                if target in dep_names:
+                    warnings.append((path, r["line"],
+                                     f"active repo {r['name']!r} depends on deprecated "
+                                     f"repo {target!r}"))
+                else:
+                    errors.append((path, r["line"],
+                                   f"depends_on target {target!r} of repo {r['name']!r} "
+                                   "not found in repo-manifest.yaml"))
+    return errors, warnings
+
+
+def load_manifest(root):
+    """Parse repo-manifest.yaml if present. Returns parsed dict or None."""
+    manifest_path = root / "repo-manifest.yaml"
+    if not manifest_path.is_file():
         return None
-    repos = set()
-    for line in manifest.read_text(encoding="utf-8").split("\n"):
-        m = re.match(r"^\s*-?\s*name:\s*(.+?)\s*$", line)
-        if m:
-            repos.add(_strip_quotes(m.group(1)))
-    return repos
+    return parse_manifest(manifest_path)
+
+
+def manifest_repo_names(manifest):
+    """All repo names (active + deprecated) usable as edge/wikilink targets."""
+    names = {d["name"] for d in manifest["deprecated"]}
+    for repos in manifest["areas"].values():
+        names.update(r["name"] for r in repos)
+    return names
 
 
 def load_nodes(root):
@@ -296,10 +394,15 @@ def build_graph_json(nodes):
 def run(root, write=True):
     """Run all checks. Returns exit code."""
     root = Path(root)
-    manifest_repos = load_manifest_repos(root)
-    nodes, errors = load_nodes(root)
-    verrors, warnings = validate(nodes, manifest_repos, root)
-    errors = errors + verrors
+    manifest = load_manifest(root)
+    manifest_repos = manifest_repo_names(manifest) if manifest else None
+    errors, warnings = [], []
+    if manifest is not None:
+        errors, warnings = validate_manifest(manifest, root / "repo-manifest.yaml")
+    nodes, nerrors = load_nodes(root)
+    verrors, vwarnings = validate(nodes, manifest_repos, root)
+    errors = errors + nerrors + verrors
+    warnings = warnings + vwarnings
 
     for path, line, msg in warnings:
         print(f"{path}:{line}: warning: {msg}", file=sys.stderr)

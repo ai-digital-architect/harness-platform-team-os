@@ -21,11 +21,22 @@ if [ -f scripts/graph_check.py ]; then
 fi
 
 # (b) TASKS.md updated for the current task (inferred from branch task/<ID>-...).
+# Accept the update whether it is still uncommitted OR already committed on
+# this task branch (diff against the merge-base with main).
 branch="$(git symbolic-ref --short HEAD 2>/dev/null || echo "")"
 task_id="$(printf '%s' "$branch" | sed -nE 's#^task/([A-Za-z0-9.]+)-.*#\1#p')"
 if [ -n "$task_id" ]; then
-  if ! { git diff TASKS.md 2>/dev/null; git diff --cached TASKS.md 2>/dev/null; } \
+  updated=0
+  if { git diff TASKS.md 2>/dev/null; git diff --cached TASKS.md 2>/dev/null; } \
        | grep -q "$task_id"; then
+    updated=1
+  else
+    base="$(git merge-base main HEAD 2>/dev/null || echo "")"
+    if [ -n "$base" ] && git diff "$base"..HEAD -- TASKS.md 2>/dev/null | grep -q "$task_id"; then
+      updated=1
+    fi
+  fi
+  if [ "$updated" -eq 0 ]; then
     problems+=("TASKS.md row for $task_id not updated this session — set status and append PR placeholder")
   fi
 fi

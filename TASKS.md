@@ -18,7 +18,7 @@ Status legend: ⬜ todo · 🟡 in-progress · ✅ done · ⛔ blocked.
 
 | ID   | Title                                   | Status | Depends     | PR |
 |------|-----------------------------------------|--------|-------------|----|
-| T1.1 | Land repo-manifest.yaml [HUMAN→REVIEW]  | ⬜     | T0.4        |    |
+| T1.1 | Land repo-manifest.yaml [HUMAN→REVIEW]  | ✅     | T0.4        | task/T1.1-land-repo-manifest (PR pending) |
 | T1.2 | pk CLI + platform-graph skill           | ⬜     | T1.1        |    |
 | T1.3 | Capability nodes ×6                     | ⬜     | T1.1        |    |
 | T1.4 | Rich dependency nodes                   | ⬜     | T1.2        |    |
