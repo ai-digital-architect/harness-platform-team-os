@@ -1,16 +1,22 @@
-# Placeholder pipeline — real validate + index steps land in T0.4.
-image: python:3.11-slim
+# CI: validate graph + index drift check (T0.4).
+# Scripts are stdlib-only Python 3; python:3.12 (full image, not slim) is used
+# because the drift check needs git, which the slim variants do not ship.
+image: python:3.12
+
+definitions:
+  steps:
+    - step: &validate
+        name: validate graph and index
+        script:
+          - python3 -m unittest discover scripts/tests
+          - python3 scripts/graph_check.py
+          - python3 scripts/build_index.py
+          - git diff --exit-code knowledge/INDEX.md knowledge/graph.json
 
 pipelines:
-  default:
-    - step:
-        name: validate (placeholder)
-        script:
-          - echo "TODO(T0.4): run scripts/graph_check.py and scripts/build_index.py"
-          - echo "TODO(T0.4): fail on drift in knowledge/INDEX.md or knowledge/graph.json"
   pull-requests:
     '**':
-      - step:
-          name: validate (placeholder)
-          script:
-            - echo "TODO(T0.4): PR validation pipeline"
+      - step: *validate
+  branches:
+    main:
+      - step: *validate
