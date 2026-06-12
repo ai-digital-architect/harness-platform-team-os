@@ -148,14 +148,15 @@ def parse_frontmatter(text):
 def parse_manifest(path):
     """Parse repo-manifest.yaml (stdlib, targeted at its known shape).
 
-    Returns {"areas": {area: [repo, ...]}, "deprecated": [entry, ...],
-    "errors": [(line, message), ...]} where repo/entry dicts carry
-    name, depends_on (repos only), area and the 1-based source line.
+    Returns {"areas": {area: [repo, ...]}, "area_meta": {area: {field: value}},
+    "deprecated": [entry, ...], "errors": [(line, message), ...]} where repo
+    dicts carry name, depends_on, area, the 1-based source line, and every
+    other scalar/flow field of the entry (role, tech, deploy_target, docs, …).
     Shape: product_areas is a map of area -> {description, repos: [- name: …]},
     deprecated and subtree_plan are top-level; list fields are flow style.
     """
     lines = path.read_text(encoding="utf-8").split("\n")
-    areas, deprecated, errors = {}, [], []
+    areas, area_meta, deprecated, errors = {}, {}, [], []
     section = None
     area, area_indent = None, None
     repo = None
@@ -184,20 +185,29 @@ def parse_manifest(path):
             elif s.endswith(":") and (area_indent is None or indent <= area_indent):
                 area, area_indent, repo = s[:-1].strip(), indent, None
                 areas.setdefault(area, [])
-            elif ":" in s and repo is not None:
+                area_meta.setdefault(area, {})
+            elif ":" in s:
                 key, val = s.split(":", 1)
-                if key.strip() == "depends_on" and val.strip():
-                    try:
-                        parsed = _parse_value(val, i)
-                    except FrontmatterError as e:
-                        errors.append((e.line, e.message))
-                        continue
-                    repo["depends_on"] = parsed if isinstance(parsed, list) else [parsed]
-            # description:/repos: keys and repo scalar fields need no handling
+                key = key.strip()
+                if not val.strip():
+                    continue  # block keys (repos:) and empty values
+                try:
+                    parsed = _parse_value(val, i)
+                except FrontmatterError as e:
+                    errors.append((e.line, e.message))
+                    continue
+                if repo is not None:
+                    if key == "depends_on":
+                        repo[key] = parsed if isinstance(parsed, list) else [parsed]
+                    elif key not in repo:
+                        repo[key] = parsed
+                elif area is not None:
+                    area_meta.setdefault(area, {})[key] = parsed
         elif section == "deprecated":
             if s.startswith("- name:"):
                 deprecated.append({"name": _strip_quotes(s.split(":", 1)[1]), "line": i})
-    return {"areas": areas, "deprecated": deprecated, "errors": errors}
+    return {"areas": areas, "area_meta": area_meta, "deprecated": deprecated,
+            "errors": errors}
 
 
 def validate_manifest(manifest, path):
