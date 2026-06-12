@@ -1,4 +1,277 @@
 {
-  "edges": [],
-  "nodes": []
+  "edges": [
+    {
+      "from": "capabilities/container-builds",
+      "rel": "implements",
+      "to": "buildi"
+    },
+    {
+      "from": "capabilities/container-builds",
+      "rel": "implements",
+      "to": "buildi-cli"
+    },
+    {
+      "from": "capabilities/container-builds",
+      "rel": "implements",
+      "to": "buildi-kaniko"
+    },
+    {
+      "from": "capabilities/container-builds",
+      "rel": "implements",
+      "to": "buildi-kaniko-arm64"
+    },
+    {
+      "from": "capabilities/container-builds",
+      "rel": "implements",
+      "to": "buildi-kaniko-images"
+    },
+    {
+      "from": "capabilities/container-builds",
+      "rel": "implements",
+      "to": "buildi-terraform-connect"
+    },
+    {
+      "from": "capabilities/container-builds",
+      "rel": "implements",
+      "to": "buildi-terraform-data"
+    },
+    {
+      "from": "capabilities/container-builds",
+      "rel": "implements",
+      "to": "buildi-terraform-ecs"
+    },
+    {
+      "from": "capabilities/container-builds",
+      "rel": "implements",
+      "to": "buildi-terraform-roles"
+    },
+    {
+      "from": "capabilities/developer-tools",
+      "rel": "implements",
+      "to": "company-mcp-server"
+    },
+    {
+      "from": "capabilities/developer-tools",
+      "rel": "implements",
+      "to": "harness-actions"
+    },
+    {
+      "from": "capabilities/developer-tools",
+      "rel": "implements",
+      "to": "harness-ai-toolkit"
+    },
+    {
+      "from": "capabilities/developer-tools",
+      "rel": "implements",
+      "to": "harness-cli"
+    },
+    {
+      "from": "capabilities/developer-tools",
+      "rel": "implements",
+      "to": "harness-managed-pipeline-schema"
+    },
+    {
+      "from": "capabilities/developer-tools",
+      "rel": "implements",
+      "to": "harness-marketplace"
+    },
+    {
+      "from": "capabilities/developer-tools",
+      "rel": "implements",
+      "to": "harness-pipeline-ops"
+    },
+    {
+      "from": "capabilities/developer-tools",
+      "rel": "implements",
+      "to": "harness-rewrite-recipes"
+    },
+    {
+      "from": "capabilities/developer-tools",
+      "rel": "implements",
+      "to": "harness-templates"
+    },
+    {
+      "from": "capabilities/developer-tools",
+      "rel": "implements",
+      "to": "harness-utilities"
+    },
+    {
+      "from": "capabilities/infrastructure",
+      "rel": "implements",
+      "to": "111282-113518-terraform-base"
+    },
+    {
+      "from": "capabilities/infrastructure",
+      "rel": "implements",
+      "to": "111282-113518-terraform-cosign"
+    },
+    {
+      "from": "capabilities/infrastructure",
+      "rel": "implements",
+      "to": "harness-ecs-delegate-terraform-ecs"
+    },
+    {
+      "from": "capabilities/infrastructure",
+      "rel": "implements",
+      "to": "harness-terraform-data"
+    },
+    {
+      "from": "capabilities/infrastructure",
+      "rel": "implements",
+      "to": "harness-terraform-eks-blue"
+    },
+    {
+      "from": "capabilities/infrastructure",
+      "rel": "implements",
+      "to": "harness-terraform-eks-green"
+    },
+    {
+      "from": "capabilities/infrastructure",
+      "rel": "implements",
+      "to": "harness-terraform-integration"
+    },
+    {
+      "from": "capabilities/infrastructure",
+      "rel": "implements",
+      "to": "harness-terraform-lambda"
+    },
+    {
+      "from": "capabilities/infrastructure",
+      "rel": "implements",
+      "to": "harness-terraform-magpie-consumer-lambda"
+    },
+    {
+      "from": "capabilities/infrastructure",
+      "rel": "implements",
+      "to": "harness-terraform-route53"
+    },
+    {
+      "from": "capabilities/infrastructure",
+      "rel": "implements",
+      "to": "harness-terraform-secrets"
+    },
+    {
+      "from": "capabilities/integrations",
+      "rel": "implements",
+      "to": "harness-magpie-consumer-lambda"
+    },
+    {
+      "from": "capabilities/integrations",
+      "rel": "implements",
+      "to": "lambda-cve-data-sync"
+    },
+    {
+      "from": "capabilities/integrations",
+      "rel": "implements",
+      "to": "lambda-harness-event-handler"
+    },
+    {
+      "from": "capabilities/integrations",
+      "rel": "implements",
+      "to": "lambda-harness-grc"
+    },
+    {
+      "from": "capabilities/integrations",
+      "rel": "implements",
+      "to": "lambda-jet-evidence-integration"
+    },
+    {
+      "from": "capabilities/integrations",
+      "rel": "implements",
+      "to": "lambda-privileged-access-mgmt"
+    },
+    {
+      "from": "capabilities/policy-and-governance",
+      "rel": "implements",
+      "to": "harness-adr"
+    },
+    {
+      "from": "capabilities/policy-and-governance",
+      "rel": "implements",
+      "to": "harness-dynatrace-cloudwatch"
+    },
+    {
+      "from": "capabilities/policy-and-governance",
+      "rel": "implements",
+      "to": "harness-eks-extension-dynatrace"
+    },
+    {
+      "from": "capabilities/policy-and-governance",
+      "rel": "implements",
+      "to": "harness-policy"
+    },
+    {
+      "from": "capabilities/self-service",
+      "rel": "implements",
+      "to": "harness-account-resources"
+    },
+    {
+      "from": "capabilities/self-service",
+      "rel": "implements",
+      "to": "harness-api"
+    },
+    {
+      "from": "capabilities/self-service",
+      "rel": "implements",
+      "to": "harness-custom-delegate"
+    },
+    {
+      "from": "capabilities/self-service",
+      "rel": "implements",
+      "to": "harness-custom-secrets-mgr"
+    },
+    {
+      "from": "capabilities/self-service",
+      "rel": "implements",
+      "to": "harness-db-app"
+    },
+    {
+      "from": "capabilities/self-service",
+      "rel": "implements",
+      "to": "harness-ecs-delegate-app"
+    },
+    {
+      "from": "capabilities/self-service",
+      "rel": "implements",
+      "to": "harness-platform-api"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "capabilities/container-builds",
+      "status": "draft",
+      "title": "Container builds \u2014 Buildi container build system",
+      "type": "capability"
+    },
+    {
+      "id": "capabilities/developer-tools",
+      "status": "draft",
+      "title": "Developer tools \u2014 CLIs, AI tooling, pipeline utilities",
+      "type": "capability"
+    },
+    {
+      "id": "capabilities/infrastructure",
+      "status": "draft",
+      "title": "Infrastructure \u2014 Terraform modules, EKS, networking, IAM",
+      "type": "capability"
+    },
+    {
+      "id": "capabilities/integrations",
+      "status": "draft",
+      "title": "Integrations \u2014 Lambda-based event processing and integrations",
+      "type": "capability"
+    },
+    {
+      "id": "capabilities/policy-and-governance",
+      "status": "draft",
+      "title": "Policy and governance \u2014 OPA policies, ADRs, monitoring",
+      "type": "capability"
+    },
+    {
+      "id": "capabilities/self-service",
+      "status": "draft",
+      "title": "Self-service \u2014 user-facing APIs and platform services",
+      "type": "capability"
+    }
+  ]
 }
