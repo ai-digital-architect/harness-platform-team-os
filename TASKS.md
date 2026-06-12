@@ -19,7 +19,7 @@ Status legend: ⬜ todo · 🟡 in-progress · ✅ done · ⛔ blocked.
 | ID   | Title                                   | Status | Depends     | PR |
 |------|-----------------------------------------|--------|-------------|----|
 | T1.1 | Land repo-manifest.yaml [HUMAN→REVIEW]  | ✅     | T0.4        | task/T1.1-land-repo-manifest (PR pending) |
-| T1.2 | pk CLI + platform-graph skill           | ⬜     | T1.1        |    |
+| T1.2 | pk CLI + platform-graph skill           | ✅     | T1.1        | task/T1.2-pk-cli-platform-graph (PR pending) |
 | T1.3 | Capability nodes ×6                     | ✅     | T1.1        | task/T1.3-capability-nodes (PR pending) |
 | T1.4 | Rich dependency nodes                   | ⬜     | T1.2        |    |
 | T1.5 | Decisions index                         | ⬜     | T1.1        |    |
@@ -30,10 +30,16 @@ Status legend: ⬜ todo · 🟡 in-progress · ✅ done · ⛔ blocked.
 
 | ID   | Title                                   | Status | Depends       | PR |
 |------|-----------------------------------------|--------|---------------|----|
-| T2.1 | Pick top 5 workflows [HUMAN]            | ⬜     | —             |    |
+| T2.1 | Pick top 5 workflows [HUMAN]            | ✅     | —             | task/T2.1-pick-workflows (PR pending) |
 | T2.2 | Mine + author workflow nodes ×5         | ⬜     | T2.1, T1.4    |    |
 | T2.3 | Convention nodes ×3 + gotcha skill      | ⬜     | T1.4          |    |
 | T2.4 | Graph-driven worktree scripts           | ⬜     | T2.2          |    |
+
+**T2.1 selection (2026-06-11, utpal):** the 5 workflow nodes for T2.2 are
+`eks-infrastructure-upgrade`, `cross-repo-feature`, `add-lambda-integration`,
+`add-harness-api-endpoint`, `new-buildi-image`.
+[HUMAN] still owed for T2.2: 2–3 exemplar past changes (PR links or commits)
+per workflow — provide together with `$CLONES_DIR` when T1.4/T2.2 start.
 
 **Gate G2 [HUMAN]:** workflow owners resolve TODO(decide); one real ticket executed.
 
