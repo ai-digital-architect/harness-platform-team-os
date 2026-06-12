@@ -21,8 +21,8 @@ Status legend: ⬜ todo · 🟡 in-progress · ✅ done · ⛔ blocked.
 | T1.1 | Land repo-manifest.yaml [HUMAN→REVIEW]  | ✅     | T0.4        | task/T1.1-land-repo-manifest (PR pending) |
 | T1.2 | pk CLI + platform-graph skill           | ✅     | T1.1        | task/T1.2-pk-cli-platform-graph (PR pending) |
 | T1.3 | Capability nodes ×6                     | ✅     | T1.1        | task/T1.3-capability-nodes (PR pending) |
-| T1.4 | Rich dependency nodes                   | ⬜     | T1.2        |    |
-| T1.5 | Decisions index                         | ⬜     | T1.1        |    |
+| T1.4 | Rich dependency nodes                   | ⛔     | T1.2        | blocked: [HUMAN] $CLONES_DIR with repo clones not yet provided (2026-06-11) |
+| T1.5 | Decisions index                         | ⛔     | T1.1        | blocked: [HUMAN] harness-adr clone/export not yet provided (2026-06-11) |
 
 **Gate G1 [HUMAN]:** owners review capability + dependency PRs; promote to active.
 
@@ -47,7 +47,7 @@ per workflow — provide together with `$CLONES_DIR` when T1.4/T2.2 start.
 
 | ID   | Title                                   | Status | Depends     | PR |
 |------|-----------------------------------------|--------|-------------|----|
-| T3.1 | Template renderer                       | ⬜     | T1.2        |    |
+| T3.1 | Template renderer                       | ✅     | T1.2        | task/T3.1-template-renderer (PR pending) |
 | T3.2 | sync-harness.sh + pilot to 3 repos      | ⬜     | T3.1        |    |
 | T3.3 | knowledge-gate CI for code repos        | ⬜     | T3.1        |    |
 | T3.4 | Claude Stop-hook for code repos         | ⬜     | T3.2        |    |
